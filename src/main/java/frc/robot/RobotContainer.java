@@ -18,7 +18,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.Constants.OperatorConstants;
+import frc.robot.commands.swervedrive.drivebase.OdmDrivebase;
+import frc.robot.commands.swervedrive.drivebase.OdmDrivebase;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import swervelib.SwerveInputStream;
@@ -124,6 +126,52 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
 
     driverXbox.x().onTrue((Commands.runOnce(drivebase::zeroGyro)));
+
+    // Fully reset odometry
+    driverXbox.start().onTrue(
+        Commands.runOnce(() -> {
+            drivebase.zeroGyro();
+            drivebase.resetOdometry(new Pose2d(0, 0, drivebase.getPose().getRotation()));
+        })
+    );
+
+    driverXbox.a().onTrue(
+        Commands.sequence(
+            new OdmDrivebase(drivebase, 2, 0,  0.5),
+            new OdmDrivebase(drivebase, 2, 3,  0.5),
+            new OdmDrivebase(drivebase, 0, 3,  0.5),
+            new OdmDrivebase(drivebase, 0, 0,  0.5)
+        )
+    );
+
+    driverXbox.b().onTrue(
+        Commands.sequence(
+            new OdmDrivebase(drivebase, 2, 0, 1.2),
+            new OdmDrivebase(drivebase, 2, 3, 1.2),
+            new OdmDrivebase(drivebase, 0, 3, 1.2),
+            new OdmDrivebase(drivebase, 0, 0, 1.2)
+        )
+    );
+
+    driverXbox.y().onTrue(
+        Commands.sequence(
+            new OdmDrivebase(drivebase, 2, 0,  1.5),
+            new OdmDrivebase(drivebase, 2, 3, 1.5),
+            new OdmDrivebase(drivebase, 0, 3, 1.5),
+            new OdmDrivebase(drivebase, 0, 0, 1.5)
+        )
+    );
+
+    driverXbox.leftBumper().onTrue(
+        Commands.sequence(
+            new OdmDrivebase(drivebase, 2, 0, 3),
+            new OdmDrivebase(drivebase, 2, 3, 3),
+            new OdmDrivebase(drivebase, 0, 3, 3),
+            new OdmDrivebase(drivebase, 0, 0, 3)
+        )
+    );
+
+    driverXbox.rightBumper().onTrue(new OdmDrivebase(drivebase, 2, 3, 3));
 
   }
 
