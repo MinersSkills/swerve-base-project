@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Constants.OperatorConstants;
+import frc.robot.commands.LimeLight.AlignToTag;
 import frc.robot.commands.swervedrive.drivebase.DriveToPoseCommand;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
@@ -169,11 +170,13 @@ public class RobotContainer {
         // )
         // );   
 
-        driverXbox.a().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2.92, 0.0, new Rotation2d())));
+        // driverXbox.a().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2.92, 0.0, new Rotation2d())));
         
-        driverXbox.back().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(0, 0, new Rotation2d())));
+        // driverXbox.back().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(0, 0, new Rotation2d())));
 
-        driverXbox.b().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2, 3, new Rotation2d())));
+        // driverXbox.b().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2, 3, new Rotation2d())));
+
+        driverXbox.a().onTrue(new AlignToTag(drivebase));
     }
 
     /**
