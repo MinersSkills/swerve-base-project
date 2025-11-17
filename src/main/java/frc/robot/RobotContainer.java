@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -127,6 +128,9 @@ public class RobotContainer {
                     drivebase.zeroGyro();
                     drivebase.resetOdometry(new Pose2d(0, 0, drivebase.getPose().getRotation()));
                 }));
+
+         driverXbox.back().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
+
 
         // driverXbox.a().onTrue(
         // Commands.sequence(

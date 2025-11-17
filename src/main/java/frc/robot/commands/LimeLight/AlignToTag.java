@@ -62,8 +62,8 @@ public class AlignToTag extends Command {
             double[] positions = LimeLightHelpers.getBotPose_TargetSpace("");
 
             // Putting the values on dashboard
-            SmartDashboard.putNumber("X_targetspace", positions[0]);
-            SmartDashboard.putNumber("Z_targetspace", positions[2]);
+            SmartDashboard.putNumber("X_targetspace", positions[2]);
+            SmartDashboard.putNumber("Z_targetspace", positions[0]);
             SmartDashboard.putNumber("Yaw_targetspace", positions[4]);
 
             /*
@@ -74,9 +74,9 @@ public class AlignToTag extends Command {
              */
 
             // Calculating the speeds
-            double xSpeed = xController.calculate(positions[2]);
-            double ySpeed = yController.calculate(positions[0]);
-            double rotSpeed = rotController.calculate(positions[4]);
+            double xSpeed = xController.calculate(positions[2]); // 2
+            double ySpeed = -yController.calculate(positions[0]); // 0
+            double rotSpeed = -rotController.calculate(positions[4]); // 4
 
             swerve.drive(new Translation2d(xSpeed, ySpeed), rotSpeed, false);
 
@@ -89,7 +89,7 @@ public class AlignToTag extends Command {
 
         } else {
             // if dont see the tag, stop the swerve
-            swerve.drive(new Translation2d(), 0, false);
+            swerve.drive(new Translation2d(0,0), 0, false);
         }
 
         // Putting the time to debug
