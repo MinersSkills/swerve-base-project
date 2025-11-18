@@ -8,13 +8,13 @@ public class LimeLightConstants {
         public static final PIDConstants TRANSLATION_PID = new PIDConstants(0.7, 0, 0);
         public static final PIDConstants ANGLE_PID = new PIDConstants(0.009, 0.001, 0);
 
-        public static final double X_ALIGNMENT_P = 2.7; // 3
-        public static final double Y_ALINGMENT_P = 2.7; // 3
-        public static final double ROT_ALINGMENT_P = 0.04; // 0.051
+        public static final double X_ALIGNMENT_P = 2.55; // 2.7
+        public static final double Y_ALINGMENT_P = 2.55; // 2.7
+        public static final double ROT_ALINGMENT_P = 0.033; // 0.051
 
         public static final double X_ALINGMENT_D = 0.01; // 0.01
-        public static final double Y_ALINGMENT_D = 0;
-        public static final double ROT_ALINGMENT_D = 0.0001; // 0.0001
+        public static final double Y_ALINGMENT_D = 0.01;
+        public static final double ROT_ALINGMENT_D = 0.003; // 0.0001
     }
 
     public static class Setpoints {
@@ -31,6 +31,6 @@ public class LimeLightConstants {
 
     public static class Time {
         public static final double DONT_SEE_TAG_WAIT_TIME = 0.5;
-        public static final double POSE_VALIDATION_TIME = 0.1;
+        public static final double POSE_VALIDATION_TIME = 0.05;
     }
 }

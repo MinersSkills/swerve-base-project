@@ -23,9 +23,9 @@ public class AlignToTag extends Command {
     public AlignToTag(SwerveSubsystem swerve) {
         this.swerve = swerve;
 
-        xController = new PIDController(LimeLightConstants.PidValues.X_ALIGNMENT_P, 0.0, 0.0);
-        yController = new PIDController(LimeLightConstants.PidValues.Y_ALINGMENT_P, 0.0, 0.0);
-        rotController = new PIDController(LimeLightConstants.PidValues.ROT_ALINGMENT_P, 0.0, 0.0);
+        xController = new PIDController(LimeLightConstants.PidValues.X_ALIGNMENT_P, 0.0, LimeLightConstants.PidValues.X_ALINGMENT_D);
+        yController = new PIDController(LimeLightConstants.PidValues.Y_ALINGMENT_P, 0.0, LimeLightConstants.PidValues.Y_ALINGMENT_D);
+        rotController = new PIDController(LimeLightConstants.PidValues.ROT_ALINGMENT_P, 0.0, LimeLightConstants.PidValues.ROT_ALINGMENT_D);
 
         addRequirements(swerve);
     }

@@ -164,8 +164,8 @@ public class SwerveSubsystem extends SubsystemBase {
       vision.updatePoseEstimation(swerveDrive);
     }
     Pose2d pose = getPose();
-    // System.out.printf("Pose X=%.2f  Y=%.2f  Target(X=%.2f,Y=%.2f)%n",
-    // pose.getX(), pose.getY(), pose.getX(), pose.getY());
+    System.out.printf("Pose X=%.2f  Y=%.2f  Target(X=%.2f,Y=%.2f)%n",
+    pose.getX(), pose.getY(), pose.getX(), pose.getY());
   }
 
   public void driveToPosePID(Pose2d targetPose){
