@@ -156,7 +156,7 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // When vision is enabled we must manually update odometry in SwerveDrive
-    if(activeDriveToPose && targetPose != null){
+    if (activeDriveToPose && targetPose != null) {
       updateDriveToPose();
     }
     if (visionDriveTest) {
@@ -165,43 +165,46 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     Pose2d pose = getPose();
     System.out.printf("Pose X=%.2f  Y=%.2f  Target(X=%.2f,Y=%.2f)%n",
-    pose.getX(), pose.getY(), pose.getX(), pose.getY());
+        pose.getX(), pose.getY(), pose.getX(), pose.getY());
   }
 
-  public void driveToPosePID(Pose2d targetPose){
+  public void driveToPosePID(Pose2d targetPose) {
     this.targetPose = targetPose;
     this.activeDriveToPose = true;
     pidX.reset();
     pidY.reset();
   }
 
-  private void updateDriveToPose(){
+  private void updateDriveToPose() {
     Pose2d currentPose = getPose();
 
     double vx = pidX.calculate(currentPose.getX(), targetPose.getX());
     double vy = pidY.calculate(currentPose.getY(), targetPose.getY());
 
-    vx = Math.max(-DrivebaseConstants.Max_speed.MAX_SPEED_MPS, Math.min(DrivebaseConstants.Max_speed.MAX_SPEED_MPS, vx));
-    vy = Math.max(-DrivebaseConstants.Max_speed.MAX_SPEED_MPS, Math.min(DrivebaseConstants.Max_speed.MAX_SPEED_MPS, vy));
+    vx = Math.max(-DrivebaseConstants.Max_speed.MAX_SPEED_MPS,
+        Math.min(DrivebaseConstants.Max_speed.MAX_SPEED_MPS, vx));
+    vy = Math.max(-DrivebaseConstants.Max_speed.MAX_SPEED_MPS,
+        Math.min(DrivebaseConstants.Max_speed.MAX_SPEED_MPS, vy));
 
     ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, 0, currentPose.getRotation());
 
     driveFieldOriented(speeds);
 
     System.out.printf("Driving X=%.2f  Y=%.2f  Target(X=%.2f,Y=%.2f)%n",
-    currentPose.getX(), currentPose.getY(), targetPose.getX(), targetPose.getY());
+        currentPose.getX(), currentPose.getY(), targetPose.getX(), targetPose.getY());
   }
 
-  public boolean atPose(Pose2d targetPose){
+  public boolean atPose(Pose2d targetPose) {
     Pose2d currentPose = getPose();
     double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
     return distance < DrivebaseConstants.tolerance.METER_TOLERANCE;
   }
 
-  public void stop(){
+  public void stop() {
     this.activeDriveToPose = false;
     driveFieldOriented(new ChassisSpeeds(0, 0, 0));
   }
+
 
   @Override
   public void simulationPeriodic() {
