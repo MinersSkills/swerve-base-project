@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants.Constants;
 import frc.robot.Constants.DrivebaseConstants;
+import frc.robot.Constants.Constants.AutonConstants;
 import frc.robot.Constants.DrivebaseConstants.TargetX_PID;
 import frc.robot.Constants.DrivebaseConstants.TargetY_PID;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
@@ -244,9 +245,9 @@ public class SwerveSubsystem extends SubsystemBase {
           new PPHolonomicDriveController(
               // PPHolonomicController is the built in path following controller for holonomic
               // drive trains
-              new PIDConstants(5.0, 0.0, 0.0),
+              AutonConstants.TRANSLATION_PID,
               // Translation PID constants
-              new PIDConstants(5.0, 0.0, 0.0)
+              AutonConstants.ANGLE_PID
           // Rotation PID constants
           ),
           config,
