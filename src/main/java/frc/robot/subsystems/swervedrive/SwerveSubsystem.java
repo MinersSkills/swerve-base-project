@@ -168,6 +168,17 @@ public class SwerveSubsystem extends SubsystemBase {
         pose.getX(), pose.getY());
   }
 
+  /**
+   * Starts an automatic movement toward a target pose using PID controllers
+   * for both X and Y translation axes.
+   *
+   * <p>
+   * This method sets the target pose, enables the DriveToPose mode,
+   * and resets the PID controllers before beginning the movement.
+   *
+   * @param targetPose The desired final pose on the field (position and
+   *                   rotation).
+   */
   public void driveToPosePID(Pose2d targetPose) {
     this.targetPose = targetPose;
     this.activeDriveToPose = true;
@@ -175,6 +186,18 @@ public class SwerveSubsystem extends SubsystemBase {
     pidY.reset();
   }
 
+  /**
+   * Periodically updates the robot’s automatic movement toward the target pose.
+   *
+   * <p>
+   * Calculates the desired X and Y chassis speeds using PID controllers,
+   * applies speed limits, converts the values into {@link ChassisSpeeds}
+   * relative to the field, and sends them to {@code driveFieldOriented}.
+   *
+   * <p>
+   * This method should be called continuously while DriveToPose mode
+   * is active.
+   */
   private void updateDriveToPose() {
     Pose2d currentPose = getPose();
 
@@ -194,17 +217,34 @@ public class SwerveSubsystem extends SubsystemBase {
         currentPose.getX(), currentPose.getY(), targetPose.getX(), targetPose.getY());
   }
 
+  /**
+   * Checks whether the robot is within the specified tolerance of the target
+   * pose.
+   *
+   * <p>
+   * This method compares only the translational distance (X,Y), ignoring
+   * rotation.
+   *
+   * @param targetPose The pose to check against.
+   * @return {@code true} if the robot is within the allowed tolerance,
+   *         {@code false} otherwise.
+   */
   public boolean atPose(Pose2d targetPose) {
     Pose2d currentPose = getPose();
     double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
     return distance < DrivebaseConstants.tolerance.METER_TOLERANCE;
   }
 
+  /**
+   * Stops any automatic DriveToPose movement and brings the robot to a halt.
+   *
+   * <p>
+   * Disables DriveToPose mode and sends zero speeds to the drivetrain.
+   */
   public void stop() {
     this.activeDriveToPose = false;
     driveFieldOriented(new ChassisSpeeds(0, 0, 0));
   }
-
 
   @Override
   public void simulationPeriodic() {
