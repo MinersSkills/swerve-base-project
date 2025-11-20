@@ -21,6 +21,7 @@ import frc.robot.Constants.Constants.OperatorConstants;
 import frc.robot.commands.LimeLight.AlignToTag;
 import frc.robot.commands.swervedrive.drivebase.DriveToPoseCommand;
 import frc.robot.dashboard.Dashboards;
+import frc.robot.joystick.KeyboardController;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import swervelib.SwerveInputStream;
@@ -38,6 +39,7 @@ public class RobotContainer {
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     final CommandXboxController driverXbox = new CommandXboxController(0);
+    final KeyboardController keyboardController = new KeyboardController();
     // The robot's subsystems and commands are defined here...
     private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
             "swerve/neo"));
@@ -143,6 +145,8 @@ public class RobotContainer {
                 }));
 
         driverXbox.back().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
+
+        keyboardController.getATrigger().onTrue(new AlignToTag(drivebase));
 
         driverXbox.b().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2, 0.0, new Rotation2d())));
 
