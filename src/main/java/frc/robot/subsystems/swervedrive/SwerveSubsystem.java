@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.Meter;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
-import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
@@ -165,8 +164,8 @@ public class SwerveSubsystem extends SubsystemBase {
       vision.updatePoseEstimation(swerveDrive);
     }
     Pose2d pose = getPose();
-    System.out.printf("Pose X=%.2f  Y=%.2f  Target(X=%.2f,Y=%.2f)%n",
-        pose.getX(), pose.getY(), pose.getX(), pose.getY());
+    System.out.printf("Pose X=%.2f  Y=%.2f",
+        pose.getX(), pose.getY());
   }
 
   public void driveToPosePID(Pose2d targetPose) {

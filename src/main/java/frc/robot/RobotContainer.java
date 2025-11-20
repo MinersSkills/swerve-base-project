@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Constants.OperatorConstants;
 import frc.robot.commands.LimeLight.AlignToTag;
+import frc.robot.commands.swervedrive.drivebase.DriveToPoseCommand;
 import frc.robot.dashboard.Dashboards;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
@@ -127,6 +128,7 @@ public class RobotContainer {
     private void configureBindings() {
 
         NamedCommands.registerCommand("AlignToTag", new AlignToTag(drivebase));
+        NamedCommands.registerCommand("DriveToPose", new DriveToPoseCommand(drivebase, new Pose2d(1.3, 7.6, new Rotation2d())));
 
         Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
         drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
@@ -140,50 +142,9 @@ public class RobotContainer {
                     drivebase.resetOdometry(new Pose2d(0, 0, drivebase.getPose().getRotation()));
                 }));
 
-         driverXbox.back().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
+        driverXbox.back().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
-
-        // driverXbox.a().onTrue(
-        // Commands.sequence(
-        // new OdmDrivebase(drivebase, 2, 0, 0.05),
-        // new OdmDrivebase(drivebase, 2, 3, 0.05),
-        // new OdmDrivebase(drivebase, 0, 3, 0.05),
-        // new OdmDrivebase(drivebase, 0, 0, 0.05)
-        // )
-        // );
-
-        // driverXbox.b().onTrue(
-        // Commands.sequence(
-        // new OdmDrivebase(drivebase, 2, 0, 0.25),
-        // new OdmDrivebase(drivebase, 2, 3, 0.25),
-        // new OdmDrivebase(drivebase, 0, 3, 0.25),
-        // new OdmDrivebase(drivebase, 0, 0, 0.25)
-        // )
-        // );
-
-        // driverXbox.y().onTrue(
-        // Commands.sequence(
-        // new OdmDrivebase(drivebase, 2, 0, 0.75),
-        // new OdmDrivebase(drivebase, 2, 3, 0.75),
-        // new OdmDrivebase(drivebase, 0, 3, 0.75),
-        // new OdmDrivebase(drivebase, 0, 0, 0.75)
-        // )
-        // );
-
-        // driverXbox.leftBumper().onTrue(
-        // Commands.sequence(
-        // new OdmDrivebase(drivebase, 2, 0, 1),
-        // new OdmDrivebase(drivebase, 2, 3, 1),
-        // new OdmDrivebase(drivebase, 0, 3, 1),
-        // new OdmDrivebase(drivebase, 0, 0, 1)
-        // )
-        // );   
-
-        // driverXbox.a().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2.92, 0.0, new Rotation2d())));
-        
-        // driverXbox.back().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(0, 0, new Rotation2d())));
-
-        // driverXbox.b().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2, 3, new Rotation2d())));
+        driverXbox.b().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2, 0.0, new Rotation2d())));
 
         driverXbox.a().onTrue(new AlignToTag(drivebase));
     }
