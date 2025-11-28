@@ -11,11 +11,11 @@
     }
   },
   "currentLimit": {
-    "drive": 40,
+    "drive": 60,
     "angle": 20
   },
   "rampRate": {
-    "drive": 0.25,
+    "drive": 0.15,
     "angle": 0.25
   },
   "wheelGripCoefficientOfFriction": 1.19,

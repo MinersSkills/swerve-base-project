@@ -9,7 +9,7 @@ public class Dashboards {
         double[] positions = LimeLightHelpers.getBotPose_TargetSpace("");
 
         SmartDashboard.putNumber("X_targetspace", positions[2]);
-        SmartDashboard.putNumber("Z_targetspace", positions[0]);
+        SmartDashboard.putNumber("Y_targetspace", positions[0]);
         SmartDashboard.putNumber("Yaw_targetspace", positions[4]);
     }
 }

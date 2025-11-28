@@ -6,10 +6,17 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.Constants.OperatorConstants;
 import frc.robot.commands.LimeLight.AlignToTag;
 import frc.robot.commands.swervedrive.drivebase.DriveToPoseCommand;
@@ -55,17 +63,19 @@ public class RobotContainer {
             () -> -driverXbox.getLeftX())
             .withControllerRotationAxis(driverXbox::getRightX)
             .deadband(OperatorConstants.DEADBAND)
-            .scaleTranslation(.9)
-            .scaleRotation(.4)
-            .allianceRelativeControl(false);
+            .scaleTranslation(1)
+            .allianceRelativeControl(true);
 
     /**
      * Clone's the angular velocity input stream and converts it to a fieldRelative
      * input stream.
      */
-    SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(driverXbox::getRightX,
-            driverXbox::getRightY)
-            .headingWhile(true);
+    SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(() -> driverXbox.getRightX() * -1,
+                                                                                               () -> driverXbox.getRightY() * -1)
+            .headingWhile(true)
+            .driveToPose(() -> getRetreatPose(FieldConstants.Reef.centerFaces[6], -0.7),
+                                        new ProfiledPIDController(5, 0, 0, new Constraints(.5, .5)), 
+                                        new ProfiledPIDController(1,0, 0, new Constraints(Units.degreesToRadians(90), Units.degreesToRadians(180))));
 
     /**
      * Clone's the angular velocity input stream and converts it to a robotRelative
@@ -106,12 +116,17 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        // Configure the trigger bindings
+        Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
+        // Configure the trigger bindingss
         configureBindings();
         DriverStation.silenceJoystickConnectionWarning(true);
+
+        NamedCommands.registerCommand("DriveToPoseReef", Commands.run(() -> {driveDirectAngle.driveToPoseEnabled(true);
+        driveFieldOrientedDirectAngle.schedule();}));
+
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
-        NamedCommands.registerCommand("test", Commands.print("I EXIST"));
+
     }
 
     /**
@@ -129,28 +144,38 @@ public class RobotContainer {
      */
     private void configureBindings() {
 
-        NamedCommands.registerCommand("AlignToTag", new AlignToTag(drivebase));
-        NamedCommands.registerCommand("DriveToPose", new DriveToPoseCommand(drivebase, new Pose2d(1.3, 7.6, new Rotation2d())));
-
-        Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-        drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-
-        driverXbox.x().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-
-        // Fully reset odometry
-        driverXbox.start().onTrue(
-                Commands.runOnce(() -> {
-                    drivebase.zeroGyro();
-                    drivebase.resetOdometry(new Pose2d(0, 0, drivebase.getPose().getRotation()));
-                }));
+        Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
+        drivebase.setDefaultCommand(driveFieldOrientedDirectAngle);
 
         driverXbox.back().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
         keyboardController.getATrigger().onTrue(new AlignToTag(drivebase));
 
-        driverXbox.b().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2, 0.0, new Rotation2d())));
+        // driverXbox.b().onTrue(new DriveToPoseCommand(drivebase, new Pose2d(2, 0.0, new Rotation2d())));
 
-        driverXbox.a().onTrue(new AlignToTag(drivebase));
+        driverXbox.rightBumper().onTrue(new AlignToTag(drivebase));
+
+        // driverXbox.y().whileTrue(Commands.run(() -> drivebase.alignToCoralStationRightSide(() -> driverXbox.getLeftX(), () -> driverXbox.getLeftY()), drivebase));
+
+        // driverXbox.x().whileTrue(Commands.run(() -> drivebase.alignToCoralStationLeftSide(() -> driverXbox.getLeftX(), () -> driverXbox.getLeftY()), drivebase));
+
+        Pose2d reef = new Pose2d(13, 4, new Rotation2d(13, 4));
+
+        driveDirectAngle.aim(reef);
+        driverXbox.b().whileTrue(Commands.runEnd(() -> driveDirectAngle.aimWhile(true), () -> driveDirectAngle.aimWhile(false)));
+
+        driveDirectAngle.driveToPose(() -> getRetreatPose(FieldConstants.Reef.centerFaces[6], -0.7),
+        new ProfiledPIDController(5, 0, 0, new Constraints(.5, .5)), 
+        new ProfiledPIDController(1,0, 0, new Constraints(Units.degreesToRadians(90), Units.degreesToRadians(180))));
+
+        driverXbox.y().onTrue(Commands.runEnd(() -> driveDirectAngle.driveToPoseEnabled(true), 
+                                                () -> driveDirectAngle.driveToPoseEnabled(false)).until(() -> driveDirectAngle.atTargetPose(0.01)));
+
+        Field2d field = new Field2d();
+        field.setRobotPose(getRetreatPose(FieldConstants.Reef.centerFaces[6], -0.7));
+
+        SmartDashboard.putData("Target pose", field);
+
     }
 
     /**
@@ -158,6 +183,14 @@ public class RobotContainer {
      *
      * @return the command to run in autonomous
      */
+
+    public Command alignSwerveWithAngle(double angleDegrees){
+        SwerveInputStream alignWithAngles = driveDirectAngle.copy().withControllerHeadingAxis(
+        () -> {return Rotation2d.fromDegrees(angleDegrees).getCos();}, 
+        () -> {return Rotation2d.fromDegrees(angleDegrees).getSin();});
+        return drivebase.driveFieldOriented(alignWithAngles);
+    }
+
     public Command getAutonomousCommand() {
         // An example command will be run in autonomous
         return autoChooser.getSelected();
@@ -165,5 +198,10 @@ public class RobotContainer {
 
     public void setMotorBrake(boolean brake) {
         drivebase.setMotorBrake(brake);
+    }
+
+    public static Pose2d getRetreatPose(Pose2d pose, double distance){
+        Transform2d backwardsTransform = new Transform2d(distance, 0, new Rotation2d());
+        return pose.plus(backwardsTransform);
     }
 }
