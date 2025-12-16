@@ -7,21 +7,20 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.swervedrive.drivebase.DriveToPose;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import swervelib.SwerveInputStream;
@@ -60,14 +59,10 @@ public class RobotContainer {
    * Clone's the angular velocity input stream and converts it to a fieldRelative
    * input stream.
    */
-        SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
+      public SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
                         .withControllerHeadingAxis(() -> driverXbox.getRightX() * -1,
                                         () -> driverXbox.getRightY() * -1)
-                        .headingWhile(true)
-                        .driveToPose(() -> new Pose2d(1.913, 4.03, new Rotation2d()),
-                                        new ProfiledPIDController(5, 0, 0, new Constraints(.5, .5)),
-                                        new ProfiledPIDController(1, 0, 0, new Constraints(Units.degreesToRadians(90),
-                                                        Units.degreesToRadians(180))));
+                        .headingWhile(true);
 
   /**
    * Clone's the angular velocity input stream and converts it to a robotRelative
@@ -136,19 +131,12 @@ public class RobotContainer {
     Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
     drivebase.setDefaultCommand(driveFieldOrientedDirectAngle);
 
-    driveDirectAngle.driveToPose(() -> new Pose2d(1.913, 4.03, new Rotation2d()),
-    new ProfiledPIDController(5, 0, 0, new Constraints(.5, .5)),
-    new ProfiledPIDController(1, 0, 0, new Constraints(Units.degreesToRadians(90),
-                    Units.degreesToRadians(180))));
+    driverXbox.back().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
-
-        driverXbox.y().onTrue(Commands.runEnd(() -> driveDirectAngle.driveToPoseEnabled(true),
-                                () -> driveDirectAngle.driveToPoseEnabled(false))
-                                .until(() -> driveDirectAngle.atTargetPose(0.01)));
-
+    driverXbox.y().onTrue(new DriveToPose(drivebase, new Pose2d(1.913, 4.03, new Rotation2d(45)), driveDirectAngle));
 
     Field2d field = new Field2d();
-    field.setRobotPose(new Pose2d(1.913, 4.03, new Rotation2d()));
+    field.setRobotPose(new Pose2d(2.9, 3.3, new Rotation2d(90)));
 
     SmartDashboard.putData("Target pose", field);
 
