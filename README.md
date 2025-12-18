@@ -1,118 +1,203 @@
-# Yet Another Generic Swerve Library (YAGSL) Example project
+# FRC Base Robot Project
 
-YAGSL is intended to be an easy implementation of a generic swerve drive that should work for most
-square swerve drives. The project is documented
-on [here](https://github.com/BroncBotz3481/YAGSL/wiki). The JSON documentation can also be
-found [here](docs/START.md)
+Projeto base de **robô FRC** desenvolvido para servir como fundação sólida e reutilizável para as **próximas temporadas**. Este repositório foi pensado para ser **modular, escalável e fácil de manter**, seguindo as melhores práticas recomendadas pela **WPILib**.
 
-This example is intended to be a starting place on how to use YAGSL. By no means is this intended to
-be the base of your robot project. YAGSL provides an easy way to generate a SwerveDrive which can be
-used in both TimedRobot and Command-Based Robot templates.
+---
 
+## Padrão de Commits
 
-# Overview
+Este repositório segue um padrão simples de commits para manter o histórico organizado:
 
-### Installation
+* `feat:` nova funcionalidade para o robô
+* `chore:` nova pequena funcionalidade ou ajuste fino
+* `fix:` correção de algum problema
 
-Vendor URL:
+---
+
+## Visão Geral
+
+Este projeto utiliza a arquitetura **Command-Based**, com foco em:
+
+* Código limpo e organizado
+* Separação clara de responsabilidades
+* Facilidade para adicionar novos subsistemas e comandos
+* Reutilização entre temporadas
+
+Atualmente, o projeto já conta com:
+
+* **Swerve Drive totalmente funcional (utilizando **YAGSL**)
+* **Estimação de pose com visão (Limelight)** integrada ao odometry
+* **Comando Drive To Pose funcionando** (movimento autônomo até uma pose alvo)
+* Suporte a PathPlanner
+
+---
+
+## Arquitetura do Projeto
+
+A arquitetura segue o padrão **Command-Based** da WPILib:
 
 ```
-https://broncbotz3481.github.io/YAGSL-Lib/yagsl/yagsl.json
+Robot
+ ├── RobotContainer
+ │    ├── Subsystems
+ │    └── Commands
+ │ 
+ ├── Commands
+ ├── Subsystems
+ └── Constants
 ```
 
-[Javadocs here](https://broncbotz3481.github.io/YAGSL/)  
-[Library here](https://github.com/BroncBotz3481/YAGSL/)  
-[Code here](https://github.com/BroncBotz3481/YAGSL/tree/main/swervelib)  
-[WIKI](https://github.com/BroncBotz3481/YAGSL/wiki)  
-[Config Generation](https://broncbotz3481.github.io/YAGSL-Example/)
+### Por que Command-Based?
 
-# Create an issue if there is any errors you find!
+* Facilita manutenção
+* Permite paralelismo entre comandos
+* Escala bem conforme o robô cresce
+* Padrão oficial recomendado pela FIRST
 
-We will be actively montoring this and fix any issues when we can!
+---
 
-## Development
+## Estrutura de Pastas
 
-* Development happens here on `YAGSL-Example`. `YAGSL` and `YAGSL-Lib` are updated on a nightly
-  basis.
+### `src/main/deploy`
 
-# Support our developers!
-<a href='https://ko-fi.com/yagsl' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Robot at ko-fi.com'></a>
+Contém arquivos de configuração utilizados no runtime do robô.
 
-### TL;DR Generate and download your configuration [here](https://broncbotz3481.github.io/YAGSL-Example/) and unzip it so that it follows structure below:
-
-```text
-deploy
-└── swerve
-    ├── controllerproperties.json
-    ├── modules
-    │   ├── backleft.json
-    │   ├── backright.json
-    │   ├── frontleft.json
-    │   ├── frontright.json
-    │   ├── physicalproperties.json
-    │   └── pidfproperties.json
-    └── swervedrive.json
+```
+deploy/
+ ├── pathplanner/        # Paths e autos do PathPlanner
+ └── swerve/
+     └── neo/
+         ├── modules/    # Configuração individual dos módulos
+         │   ├── frontleft.json
+         │   ├── frontright.json
+         │   ├── backleft.json
+         │   └── backright.json
+         ├── physicalproperties.json
+         ├── pidfproperties.json
+         ├── controllerproperties.json
+         └── swervedrive.json
 ```
 
-### Then create your SwerveDrive object like this.
+Esses arquivos permitem ajustes finos de **PID, geometria, motores e offsets** sem recompilar o código.
 
-```java
-import java.io.File;
-import edu.wpi.first.wpilibj.Filesystem;
-import swervelib.parser.SwerveParser;
-import swervelib.SwerveDrive;
-import edu.wpi.first.math.util.Units;
+---
 
+### `src/main/java/frc/robot`
 
-SwerveDrive swerveDrive=new SwerveParser(new File(Filesystem.getDeployDirectory(),"swerve")).createSwerveDrive(Units.feetToMeters(14.5));
+#### `subsystems/`
+
+* **SwerveSubsystem.java**
+  Responsável por todo o controle do drivetrain swerve:
+
+  * Cinemática
+  * Odometry
+  * Integração com visão
+
+---
+
+#### `commands/swervedrive/drivebase/`
+
+Comandos de controle do robô:
+
+* `AbsoluteDrive.java` – Drive absoluto
+* `AbsoluteDriveAdv.java` – Versão avançada
+* `AbsoluteFieldDrive.java` – Drive field-oriented
+* **`DriveToPose.java`** – Move o robô automaticamente até uma pose alvo no campo
+
+---
+
+#### `limelight/`
+
+Estimação de pose usando visão:
+
+* `LimelightHelpers.java` – Interface com a Limelight
+* `LimelightPoseEstimator.java` –
+
+  * Fusão de visão + odometry
+  * Valida medições
+  * Atualiza pose global do robô
+
+---
+
+#### `generalconstants/`
+
+* `DriveToPoseConstants.java`
+  Constantes específicas para o controle do Drive To Pose (PID, tolerâncias, etc).
+
+---
+
+#### Arquivos principais
+
+* `Constants.java` – Constantes globais
+* `Robot.java` – Ciclo de vida do robô
+* `RobotContainer.java` –
+
+  * Inicialização dos subsistemas
+  * Mapeamento de controles
+  * Registro de comandos
+* `Main.java` – Entry point
+
+---
+
+## Estimação de Pose com Visão
+
+O projeto já possui **estimação de pose funcional**, utilizando:
+
+* Odometry do Swerve
+* Dados de visão da **Limelight**
+* Filtros e validações para rejeitar medições ruins
+
+Isso permite:
+
+* Pose global mais precisa
+* Autônomos mais confiáveis
+* Uso eficiente do Drive To Pose
+
+---
+
+## Drive To Pose
+
+O comando **DriveToPose** permite que o robô:
+
+* Vá automaticamente até uma posição desejada
+* Controle X, Y e rotação
+* Utilize PID e tolerâncias configuráveis
+
+Ideal para:
+
+* Autônomos
+* Alinhamento automático
+* Ações assistidas no teleop
+
+---
+
+## PathPlanner
+
+Suporte nativo a **PathPlanner**, permitindo:
+
+* Criação visual de trajetórias
+* Autos reutilizáveis
+* Integração direta com o swerve
+
+Arquivos ficam em:
+
+```
+src/main/deploy/pathplanner
 ```
 
-# Migrating Old Configuration Files
+---
 
-1. Delete `wheelDiamter`, `gearRatio`, `encoderPulsePerRotation` from `physicalproperties.json`
-2. Add `optimalVoltage` to `physicalproperties.json`
-3. Delete `maxSpeed` and `optimalVoltage` from `swervedrive.json`
-4. **IF** a swerve module doesn't have the same drive motor or steering motor as the rest of the
-   swerve drive you **MUST** specify a `conversionFactor` for BOTH the drive and steering motor in
-   the modules configuration JSON file. IF one of the motors is the same as the rest of the swerve
-   drive and you want to use that `conversionFactor`, set the `conversionFactor` in the module JSON
-   configuration to 0.
-5. You MUST specify the maximum speed when creating a `SwerveDrive`
-   through `new SwerveParser(directory).createSwerveDrive(maximumSpeed);`
-6. IF you do not want to set `conversionFactor` in `swervedrive.json`. You can pass it into the
-   constructor as a parameter like this
+## Objetivo do Projeto
 
-```java
-double DriveConversionFactor = SwerveMath.calculateMetersPerRotation(Units.inchesToMeters(WHEEL_DIAMETER), GEAR_RATIO, ENCODER_RESOLUTION);
-double SteeringConversionFactor = SwerveMath.calculateDegreesPerSteeringRotation(GEAR_RATIO, ENCODER_RESOLUTION);
-SwerveDrive swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed, SteeringConversionFactor, DriveConversionFactor);
-```
+Este repositório foi criado para ser:
 
-### Falcon Support would not have been possible without support from Team 1466 Webb Robotics!
+* Uma **base reutilizável** para futuras temporadas
+* Fácil de adaptar a novos jogos
+* Escalável conforme o robô evolui
+* Um projeto de referência para a equipe
 
-# Configuration Tips
+---
 
-### My Robot Spins around uncontrollably during autonomous or when attempting to set the heading!
+## Próximos Passos
 
-* Invert the gyro scope.
-* Invert the drive motors for every module. (If front and back become reversed when turning)
-
-### Angle motors are erratic.
-
-* Invert the angle motor.
-
-### My robot is heavy.
-
-* Implement momentum velocity limitations in SwerveMath.
-
-### Ensure the IMU is centered on the robot
-
-# Maintainers
-- @thenetworkgrinch
-- @Technologyman00 
-
-# Special Thanks to Team 7900! Trial N' Terror
-Without the debugging and aid of Team 7900 the project could never be as stable or active as it is. 
-
-# YAGSL is based off Swerve Code from Team 95 in 2023
-Thank you to team 95! (Note: Since then YAGSL has turned into the ship of Theseus)
+* [ ] Implementação de superstructres para melhor controle dos subsistemas.
